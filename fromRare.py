@@ -11,7 +11,7 @@ import scipy.io
 import matplotlib.pyplot as plt
 
 
-rawData = scipy.io.loadmat('./data/Old_RARE.2022.03.29.17.27.58.mat')
+rawData = scipy.io.loadmat('./data/Old_RARE.2022.03.29.16.28.22.mat')
 imagen = rawData['image3D']
 imagen2d = imagen[5,:,:]
 
