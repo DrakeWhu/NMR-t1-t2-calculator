@@ -58,13 +58,30 @@ t2_list = separated_arrays[1]
 
 # We turn them into numpy arrays
 
-t1 = np.asarray(t1_list) 
+t1 = np.asarray(t1_list)
 t2 = np.asarray(t2_list)
 
-print(t2[:,0,0]) # [image number, width, heigh]
+t1_seedless = t1[0:10]
+t1_seeds = t1[11:22]
+
+# print(t1_seeds[0,:,:]) # [image number, height, width]
+
+def plot_pixel_ev(arr, pixel_x,pixel_y): # Function that plots the signal of a given pixel as TI increases (mostly for testing)
+    x = np.arange(0,1100,100)
+    y = np.array(np.abs(arr[:,pixel_x,pixel_y]))
+    plt.scatter(x,y)
+    plt.show()
+    return None
+
+seeds_mask = np.where(np.abs(t1_seeds) < 0.001,0,1)
+seedless_mask = np.where(np.abs(t1_seedless) < 0.001,0,1)
+
+# plot_pixel_ev(t1_seeds,40,40)
+
+# Now we create a function that gives an interpolation of the graph of T1 as TI changes, using the data points
 
 # With this next three lines we choose what image we want to see (mostly for testing)
 
 plt.figure(1)
-plt.imshow(np.abs(t1[0]), cmap='gray')
+plt.imshow(np.abs(seeds_mask[0,:,:]), cmap='gray')
 plt.show()
