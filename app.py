@@ -61,27 +61,57 @@ t2_list = separated_arrays[1]
 t1 = np.asarray(t1_list)
 t2 = np.asarray(t2_list)
 
-t1_seedless = t1[0:10]
+t1_seedless = t1[0:11]
 t1_seeds = t1[11:22]
 
 # print(t1_seeds[0,:,:]) # [image number, height, width]
 
-def plot_pixel_ev(arr, pixel_x,pixel_y): # Function that plots the signal of a given pixel as TI increases (mostly for testing)
+def pixel_ev(arr, pixel_x,pixel_y): # Function that takes a 3D array of images and the coordinates of a pixel and returns a (2,11) array with the values of the signal of the pixel chosen for TI between (0,1000)
     x = np.arange(0,1100,100)
     y = np.array(np.abs(arr[:,pixel_x,pixel_y]))
-    plt.scatter(x,y)
+    pixel_points = np.vstack((x,y))
+    #print(pixel_points)
+    #plt.scatter(pixel_points[0,:],pixel_points[1,:])
+    #plt.show()
+    return pixel_points
+
+def min_TI_value(arr,x,y): # This function gives the TI value corresponding with the minimal signal
+    ev = pixel_ev(arr,x,y)
+    min = np.argmin(ev[1,:])
+    ti = ev[0,min]
+    return ti
+
+seeds_mask = np.where(np.abs(t1_seeds) < 0.0005,0,1)
+seedless_mask = np.where(np.abs(t1_seedless) < 0.0005,0,1)
+
+# Now we create a function that takes the array of images and the mask, finds for which TI the signal is minimum for each white pixel in the mask
+# And then creates a new array where the value on each pixel is the TI where the signal was minimum (which corresponds to T1 for that pixel)
+
+def create_T1_image(mask, image_array):
+    analisis = 0
+    t1_image = np.empty((60,60))
+
+    """
+    plt.figure(1)
+    plt.imshow(mask[0,:,:], cmap='gray')
     plt.show()
-    return None
+    """
 
-seeds_mask = np.where(np.abs(t1_seeds) < 0.001,0,1)
-seedless_mask = np.where(np.abs(t1_seedless) < 0.001,0,1)
+    for i in range(0,60):
+        for j in range(0,60):
+            t1_image[i,j]  = np.where(mask[0,i,j] == 1, min_TI_value(image_array,i,j), 1)
+            analisis = analisis + 1
+    
+    print(analisis) # This variable keeps track of how many loops have been done (useful for debugging)
 
-# plot_pixel_ev(t1_seeds,40,40)
+    return t1_image
 
-# Now we create a function that gives an interpolation of the graph of T1 as TI changes, using the data points
+t1_seeds_image = create_T1_image(seeds_mask,np.abs(t1_seeds))
+t1_seedless_image = create_T1_image(seedless_mask,np.abs(t1_seedless))
 
 # With this next three lines we choose what image we want to see (mostly for testing)
 
 plt.figure(1)
-plt.imshow(np.abs(seeds_mask[0,:,:]), cmap='gray')
+plt.imshow(np.abs(t1_seeds_image), cmap='inferno')
+plt.colorbar()
 plt.show()
