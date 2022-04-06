@@ -4,16 +4,17 @@ import scipy.io
 import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
+from pathlib import Path
 
-data_path = "C:/Users/juanr/Desktop/Universidad/Master/Practicas/programa calculo t1t2/NMR-t1-t2-calculator/data"
+data_path = Path(r"C:/Users/juanr/Desktop/Universidad/Master/Practicas/programa calculo t1t2/NMR-t1-t2-calculator/rawdata/")
 
-onlyfiles = [f for f in listdir(data_path) if isfile(join(data_path,f))] # We should find a way to read a folder of folders and dump each folder in an array (now we can only read a folder of files)
+onlyfiles = [str(pp) for pp in data_path.glob("**/*.mat")]
 
-def path_file_concatenate_strings(i): # This function creates the path string
-    path = "./data/"
-    filename = onlyfiles[i]
-    str = path + filename
-    return str
+def get_slice_number(file_path): # This function gives the number of slices of a 3D image
+    rawData = scipy.io.loadmat(file_path)
+    slices = rawData['nPoints'][0][2]
+    return slices
+
 
 def import_2Dimage(file_path,i): # This function extracts only the 2D image of a chosen slice indexed by i
     rawData = scipy.io.loadmat(file_path)
@@ -22,27 +23,27 @@ def import_2Dimage(file_path,i): # This function extracts only the 2D image of a
     return image2d
 
 def create_image_array(): # This function creates the array that contains the images
-    i = 0
     image_paths_array = []
     image_array = []
-    while i <= len(onlyfiles) - 1:
-        path = path_file_concatenate_strings(i)
+    for i in range(len(onlyfiles)):
+        path = onlyfiles[i]
         image_paths_array.insert(i,path)
-        image2D = import_2Dimage(image_paths_array[i],5) # Here we choose 5 because we are working with 10 slices, but the ideal would be to use the midpoint of the array
+        image2D = import_2Dimage(image_paths_array[i],round(get_slice_number(onlyfiles[i]) * 0.5))
         image_array.insert(i, image2D)
         i = i + 1
     return image_array
 
 image_array = create_image_array()
 
+print(len(image_array))
+
 def separate_t1_t2(): # This function separates the images used to calculate T1 and T2
-    i = 0
     t1_images = []
     t2_images = []
-    while i <= len(image_array) - 1:
+    for i in range(len(image_array)):
         image = image_array[i]
-        height = len(image)
-        width = len(image[i])
+        height = len(image[0,:])
+        width = len(image[:,0])
         if width > 5*height: # Here we choose a naïve way of separating: the width must be 5 times the height or bigger. We do this cause mse generates really wide images
             t2_images.insert(i, image)
         else:
@@ -112,8 +113,8 @@ t1_seedless_image = create_T1_image(seedless_mask,np.abs(t1_seedless))
 # With this next three lines we choose what image we want to see (mostly for testing)
 
 # Now we are going to work with the mse image in order to extract the T2
-t2_seedless = t2[0] # This mse is on the wrong slice, we should use a more representative slice
-t2_seeds = t2[1]
+#t2_seedless = t2[0] # This mse is on the wrong slice, we should use a more representative slice
+#t2_seeds = t2[1]
 
 def create_t2_array(arr): # Function that we pass a 60x1800 2D array and creates a 30x60x60 3D array
     array_3D =  np.empty((30,60,60))
@@ -121,11 +122,11 @@ def create_t2_array(arr): # Function that we pass a 60x1800 2D array and creates
         array_3D[i,:,:] = np.abs(arr[0:60,60*i:60*i+60])
     return array_3D
 
-t2_seeds_3D_array = create_t2_array(t2_seeds)
-t2_seedless_3D_array = create_t2_array(t2_seedless)
+#t2_seeds_3D_array = create_t2_array(t2_seeds)
+#t2_seedless_3D_array = create_t2_array(t2_seedless)
 
-t2_seeds_mask = np.where(np.abs(t2_seeds_3D_array[0,:,:])<0.0005,0,1)
-t2_seedless_mask = np.where(np.abs(t2_seedless_3D_array[0,:,:])<0.0005,0,1)
+#t2_seeds_mask = np.where(np.abs(t2_seeds_3D_array[0,:,:])<0.0005,0,1)
+#t2_seedless_mask = np.where(np.abs(t2_seedless_3D_array[0,:,:])<0.0005,0,1)
 
 def pixel_ev_t2(arr,x,y): # Function that takes a 3D 30x60x60 array and the coordinates of a pixel, then returns an array of length 30 containing the signal of that pixel
     ev = np.empty(30)
@@ -159,11 +160,11 @@ def create_t2_image(arr,mask): # Takes in a 3D 30x60x60 array, returns a 60x60 i
             image[i,j]=np.where(mask[i,j] == 1, np.exp(m_b[0]), 0)
     return image
 
-t2_seeds_image = create_t2_image(t2_seeds_3D_array,t2_seeds_mask)
-t2_seedless_image = create_t2_image(t2_seedless_3D_array,t2_seedless_mask)
+#t2_seeds_image = create_t2_image(t2_seeds_3D_array,t2_seeds_mask)
+#t2_seedless_image = create_t2_image(t2_seedless_3D_array,t2_seedless_mask)
 
 plt.figure(1)
-plt.imshow(t2_seeds_image, cmap='inferno')
+plt.imshow(t1_seeds_image, cmap='inferno')
 plt.colorbar()
-plt.clim(0.9,1.02)
+#plt.clim(0.9,1.02)
 plt.show()
