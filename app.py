@@ -111,7 +111,59 @@ t1_seedless_image = create_T1_image(seedless_mask,np.abs(t1_seedless))
 
 # With this next three lines we choose what image we want to see (mostly for testing)
 
+# Now we are going to work with the mse image in order to extract the T2
+t2_seedless = t2[0] # This mse is on the wrong slice, we should use a more representative slice
+t2_seeds = t2[1]
+
+def create_t2_array(arr): # Function that we pass a 60x1800 2D array and creates a 30x60x60 3D array
+    array_3D =  np.empty((30,60,60))
+    for i in range(30):
+        array_3D[i,:,:] = np.abs(arr[0:60,60*i:60*i+60])
+    return array_3D
+
+t2_seeds_3D_array = create_t2_array(t2_seeds)
+t2_seedless_3D_array = create_t2_array(t2_seedless)
+
+t2_seeds_mask = np.where(np.abs(t2_seeds_3D_array[0,:,:])<0.0005,0,1)
+t2_seedless_mask = np.where(np.abs(t2_seedless_3D_array[0,:,:])<0.0005,0,1)
+
+def pixel_ev_t2(arr,x,y): # Function that takes a 3D 30x60x60 array and the coordinates of a pixel, then returns an array of length 30 containing the signal of that pixel
+    ev = np.empty(30)
+    for i in range(30):
+        ev[i] = arr[i,x,y]
+    return ev
+
+def linearize_array(arr): # Function that takes a 1D array of range 30 containing exponential-like data and linearizes it
+    lin_ev = np.empty(30)
+    lin_ev = np.log(arr)
+    return lin_ev
+
+def linear_regression(arr): # Function that makes a linear regression from an 1D array of range 30
+    x = range(30)
+    A = np.vstack([x,np.ones(len(x))]).T
+    m = np.linalg.lstsq(A,arr,rcond=None)
+    return m
+
+m = linear_regression(range(30))
+print(m[0])
+
+def create_t2_image(arr,mask): # Takes in a 3D 30x60x60 array, returns a 60x60 image
+    image = np.empty((60,60))
+    for i in range(60):
+        for j in range (60):
+            ev = pixel_ev_t2(arr,i,j)
+            lin_ev = linearize_array(ev)
+            m = linear_regression(lin_ev)
+            m_b = m[0]
+            #image[i,j]=np.exp(m_b[0])
+            image[i,j]=np.where(mask[i,j] == 1, np.exp(m_b[0]), 0)
+    return image
+
+t2_seeds_image = create_t2_image(t2_seeds_3D_array,t2_seeds_mask)
+t2_seedless_image = create_t2_image(t2_seedless_3D_array,t2_seedless_mask)
+
 plt.figure(1)
-plt.imshow(np.abs(t1_seeds_image), cmap='inferno')
+plt.imshow(t2_seeds_image, cmap='inferno')
 plt.colorbar()
+plt.clim(0.9,1.02)
 plt.show()
