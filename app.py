@@ -62,19 +62,23 @@ t2_list = separated_arrays[1]
 t1 = np.asarray(t1_list)
 t2 = np.asarray(t2_list)
 
-t1_seedless = t1[0:11]
-t1_seeds = t1[11:22]
+t1_orange_seedless = t1[0:11]
+t1_orange_seeds = t1[11:22]
+t1_banana_d1 = t1[22:35]
+t1_banana_bag_d1 = t1[35:48]
 
 # print(t1_seeds[0,:,:]) # [image number, height, width]
 
 def pixel_ev(arr, pixel_x,pixel_y): # Function that takes a 3D array of images and the coordinates of a pixel and returns a (2,11) array with the values of the signal of the pixel chosen for TI between (0,1000)
-    x = np.arange(0,1100,100)
+    x = range(0,1300,100)
     y = np.array(np.abs(arr[:,pixel_x,pixel_y]))
     pixel_points = np.vstack((x,y))
     #print(pixel_points)
     #plt.scatter(pixel_points[0,:],pixel_points[1,:])
     #plt.show()
     return pixel_points
+    
+# We must change this function so it gives the pixel evolution with a variable number of measurements
 
 def min_TI_value(arr,x,y): # This function gives the TI value corresponding with the minimal signal
     ev = pixel_ev(arr,x,y)
@@ -82,8 +86,10 @@ def min_TI_value(arr,x,y): # This function gives the TI value corresponding with
     ti = ev[0,min]
     return ti
 
-seeds_mask = np.where(np.abs(t1_seeds) < 0.0005,0,1)
-seedless_mask = np.where(np.abs(t1_seedless) < 0.0005,0,1)
+orange_seeds_mask = np.where(np.abs(t1_orange_seeds) < 0.0005,0,1)
+orange_seedless_mask = np.where(np.abs(t1_orange_seedless) < 0.0005,0,1)
+banana_mask = np.where(np.abs(t1_banana_d1) < 0.002,0,1)
+banana_bag_mask = np.where(np.abs(t1_banana_bag_d1) < 0.002,0,1)
 
 # Now we create a function that takes the array of images and the mask, finds for which TI the signal is minimum for each white pixel in the mask
 # And then creates a new array where the value on each pixel is the TI where the signal was minimum (which corresponds to T1 for that pixel)
@@ -100,15 +106,17 @@ def create_T1_image(mask, image_array):
 
     for i in range(0,60):
         for j in range(0,60):
-            t1_image[i,j]  = np.where(mask[0,i,j] == 1, min_TI_value(image_array,i,j), 1)
+            t1_image[i,j]  = np.where(mask[0,i,j] == 1, min_TI_value(image_array,i,j)/np.log(2), 1)
             analisis = analisis + 1
     
     print(analisis) # This variable keeps track of how many loops have been done (useful for debugging)
 
     return t1_image
 
-t1_seeds_image = create_T1_image(seeds_mask,np.abs(t1_seeds))
-t1_seedless_image = create_T1_image(seedless_mask,np.abs(t1_seedless))
+#t1_seeds_image = create_T1_image(orange_seeds_mask,np.abs(t1_orange_seeds))
+#t1_seedless_image = create_T1_image(orange_seedless_mask,np.abs(t1_orange_seedless))
+t1_banana_image = create_T1_image(banana_mask,np.abs(t1_banana_d1))
+t1_banana_bag_image = create_T1_image(banana_bag_mask,np.abs(t1_banana_bag_d1))
 
 # With this next three lines we choose what image we want to see (mostly for testing)
 
@@ -156,7 +164,6 @@ def create_t2_image(arr,mask): # Takes in a 3D 30x60x60 array, returns a 60x60 i
             lin_ev = linearize_array(ev)
             m = linear_regression(lin_ev)
             m_b = m[0]
-            #image[i,j]=np.exp(m_b[0])
             image[i,j]=np.where(mask[i,j] == 1, np.exp(m_b[0]), 0)
     return image
 
@@ -164,7 +171,7 @@ def create_t2_image(arr,mask): # Takes in a 3D 30x60x60 array, returns a 60x60 i
 #t2_seedless_image = create_t2_image(t2_seedless_3D_array,t2_seedless_mask)
 
 plt.figure(1)
-plt.imshow(t1_seeds_image, cmap='inferno')
+plt.imshow(np.abs(t1_banana_image), cmap='inferno')
 plt.colorbar()
 #plt.clim(0.9,1.02)
 plt.show()
