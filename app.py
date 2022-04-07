@@ -75,7 +75,7 @@ t1 = np.asarray(t1_list)
 t2 = np.asarray(t2_image_array)
 t2_oranges = np.asarray(t2_oranges_list)
 
-print(t2)
+# Declaring  all the different measurements
 
 t1_orange_seedless = t1[0:11]
 t1_orange_seeds = t1[11:22]
@@ -87,6 +87,10 @@ t1_banana_d3 = t1[74:87]
 t1_banana_bag_d3 = t1[87:100]
 t1_banana_d4 = t1[100:113]
 t1_banana_bag_d4 = t1[113:126]
+t2_banana_d1 = t2[0]
+t2_banana_bag_d1 = t2[1]
+t2_banana_d2 = 
+
 
 # print(t1_seeds[0,:,:]) # [image number, height, width]
 
