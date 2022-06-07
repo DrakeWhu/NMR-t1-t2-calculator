@@ -10,21 +10,10 @@ from os.path import isfile, join
 
 # Declaring  all the different measurement arrays
 
-t1_banana_d1 = t1[22:35]
-t1_banana_bag_d1 = t1[35:48]
-t1_banana_d2 = t1[48:61]
-t1_banana_bag_d2 = t1[61:74]
-t1_banana_d3 = t1[74:87]
-t1_banana_bag_d3 = t1[87:100]
-t1_banana_d4 = t1[100:113]
-t1_banana_bag_d4 = t1[113:126]
 t2_banana_d1 = t2[0]
 t2_banana_bag_d1 = t2[1]
 
 # Creating the masks for the different fruits
-
-banana_mask = np.where(np.abs(t1_banana_d1) < 0.002,0,1)
-banana_bag_mask = np.where(np.abs(t1_banana_bag_d1) < 0.002,0,1)
 
 # Creating the T1 images
 
