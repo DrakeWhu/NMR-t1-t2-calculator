@@ -4,7 +4,7 @@ This file creates the evolution of T1 for a given array of T1 images
 
 import numpy as np
 
-def average(image): # This function takes a 60x60 image and returns the average T1 of the whole image
+def average(image): # This function takes a 60x60 image and returns the average pixel value of the whole image
 
     sum = 0
     total_pixels = 0
