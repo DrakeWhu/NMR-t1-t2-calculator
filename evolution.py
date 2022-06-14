@@ -24,7 +24,7 @@ def evolution(array): # This function takes an array of 60x60 images and makes a
 
     average_t1_array = []
 
-    for i in range(3):
+    for i in range(4):
         mean = average(abs(array[i,:,:]))
         average_t1_array.append(mean)
     
