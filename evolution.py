@@ -4,13 +4,13 @@ This file creates the evolution of T1 for a given array of T1 images
 
 import numpy as np
 
-def average(image): # This function takes a 60x60 image and returns the average pixel value of the whole image
+def average(image): # This function takes a 60x60 image and returns the average pixel value of a 5x5 group of pixels
 
     sum = 0
     total_pixels = 0
 
-    for i in range(60):
-        for j in range(60):
+    for i in range(30,36):
+        for j in range(25,31):
             if image[i, j] != 0:
                 total_pixels += 1
                 sum += abs(image[i,j])
@@ -20,13 +20,13 @@ def average(image): # This function takes a 60x60 image and returns the average 
 
 
 
-def evolution(array): # This function takes an array of 60x60 images and makes an array of the averages of each one, ordered as they where before
+def evolution(array): # This function takes an array of 60x60 images and makes an array of the averages of a voxel of pixels in the meat part of the image
 
-    average_t1_array = []
+    average_t1_array = np.empty(4)
 
     for i in range(4):
         mean = average(abs(array[i,:,:]))
-        average_t1_array.append(mean)
+        np.insert(average_t1_array, i, mean)
     
     return average_t1_array
 
