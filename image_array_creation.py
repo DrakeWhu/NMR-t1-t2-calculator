@@ -39,3 +39,12 @@ def create_t2_array(arr): # Function that we pass a 60x1800 2D array and creates
     for i in range(30):
         array_3D[i,:,:] = np.abs(arr[0:60,60*i:60*i+60])
     return array_3D
+
+def createImageArray(path, name, n):
+    images = np.zeros((10, 60, 60))
+    for ima in range(n):
+        fullName = path+' ('+str(ima+1)+')'+name+' ('+str(ima+1)+').mat'
+        rawData = scipy.io.loadmat(fullName)
+        images = np.concatenate((images, np.abs(rawData['image3D'])), axis=2)
+
+    return images[:, :, 60::]

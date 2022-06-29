@@ -27,14 +27,14 @@ def create_T1_image(mask, image_array):
 
     for i in range(0,60):
         for j in range(0,60):
-            t1_image[i,j]  = np.where(mask[0,i,j] == 1, min_TI_value(image_array,i,j)/np.log(2), 1)
+            t1_image  = np.where(mask[i,j] == 1, min_TI_value(image_array,i,j)/np.log(2), 1)
 
     return t1_image
 
 def getT1(imagen, nImages, tVector, nPoints, pixel):
     imagen2d = np.squeeze(imagen[int(nPoints[2]/2), :, :]) # Tomo el segundo slice para los cálculos
 
-    # Aquí paso las diferentes imagenes una matriz de 3 dimensioens, la primera dimensión da cuenta del echo
+    # Aquí paso las diferentes imagenes una matriz de 3 dimensiones, la primera dimensión da cuenta del echo
     imagen3d = np.zeros((nImages, nPoints[1], nPoints[0]))
     for ima in range(nImages):
         imagen3d[ima, :, :] = imagen2d[:, nPoints[0]*ima:nPoints[0]*ima+nPoints[0]]
